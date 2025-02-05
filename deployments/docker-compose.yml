@@ -1,0 +1,52 @@
+services:
+
+  postgres:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: feed_journal
+    ports:
+      - "2033:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./migrations:/docker-entrypoint-initdb.d
+    restart: unless-stopped
+  
+  adminer:
+    image: adminer
+    ports:
+      - "2034:8080"
+    depends_on:
+      - postgres
+    restart: unless-stopped
+
+  minio:
+    image: minio/minio
+    ports:
+      - "2030:9000"
+      - "2031:9001"
+    environment:
+      - MINIO_ROOT_USER=user
+      - MINIO_ROOT_PASSWORD=password
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+  
+  redis:
+    image: redis
+    ports: 
+      - "2032:6379"
+    restart: unless-stopped
+
+  redis-insight:
+    image: redis/redisinsight:latest
+    ports: 
+      - "2035:5540"
+    depends_on:
+      - redis
+    restart: unless-stopped
+
+volumes:
+  minio_data:
+  postgres_data:
