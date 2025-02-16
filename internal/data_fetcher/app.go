@@ -52,10 +52,8 @@ func NewApplication(params NewApplicationParams) *Application {
 func (a *Application) Run() {
 	brLoc, _ := time.LoadLocation("America/Sao_Paulo")
 	fetchDate := time.Now().In(brLoc)
-	// fetchStartDate := time.Date(fetchDate.Year(), fetchDate.Month(), fetchDate.Day(), 0, 0, 0, 0, fetchDate.Location())
-	// fetchEndDate := time.Date(fetchDate.Year(), fetchDate.Month(), fetchDate.Day(), 23, 59, 59, 0, fetchDate.Location())
-	fetchStartDate := time.Date(2025, 02, 15, 0, 0, 0, 0, fetchDate.Location())
-	fetchEndDate := time.Date(2025, 02, 15, 23, 59, 59, 0, fetchDate.Location())
+	fetchStartDate := time.Date(fetchDate.Year(), fetchDate.Month(), fetchDate.Day(), 0, 0, 0, 0, fetchDate.Location())
+	fetchEndDate := time.Date(fetchDate.Year(), fetchDate.Month(), fetchDate.Day(), 23, 59, 59, 0, fetchDate.Location())
 
 	players, err := a.PlayerRepository.GetAll()
 
