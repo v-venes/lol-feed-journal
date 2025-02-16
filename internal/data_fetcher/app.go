@@ -9,10 +9,10 @@ import (
 	"time"
 
 	"github.com/go-redis/redis/v8"
-	redismodel "github.com/v-venes/feed_journal/pkg/models/redis"
-	"github.com/v-venes/feed_journal/pkg/models/repository"
-	"github.com/v-venes/feed_journal/pkg/repositories"
-	"github.com/v-venes/feed_journal/pkg/services"
+	redismodel "github.com/v-venes/lol-feed-journal/pkg/models/redis"
+	"github.com/v-venes/lol-feed-journal/pkg/models/repository"
+	"github.com/v-venes/lol-feed-journal/pkg/repositories"
+	"github.com/v-venes/lol-feed-journal/pkg/services"
 )
 
 type Application struct {

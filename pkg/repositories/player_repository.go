@@ -2,7 +2,7 @@ package repositories
 
 import (
 	"github.com/jmoiron/sqlx"
-	repositorymodel "github.com/v-venes/feed_journal/pkg/models/repository"
+	repositorymodel "github.com/v-venes/lol-feed-journal/pkg/models/repository"
 )
 
 type PlayerRepository struct {

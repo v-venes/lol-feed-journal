@@ -9,8 +9,8 @@ import (
 	_ "github.com/lib/pq"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
-	discordbot "github.com/v-venes/feed_journal/internal/disc_bot"
-	"github.com/v-venes/feed_journal/pkg/config"
+	discordbot "github.com/v-venes/lol-feed-journal/internal/disc_bot"
+	"github.com/v-venes/lol-feed-journal/pkg/config"
 )
 
 func init() {

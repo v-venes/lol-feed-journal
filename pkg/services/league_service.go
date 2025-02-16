@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"os"
 
-	leaguemodel "github.com/v-venes/feed_journal/pkg/models/league"
+	leaguemodel "github.com/v-venes/lol-feed-journal/pkg/models/league"
 )
 
 type LeagueService struct {

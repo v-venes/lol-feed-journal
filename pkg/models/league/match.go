@@ -3,7 +3,7 @@ package league
 import (
 	"time"
 
-	"github.com/v-venes/feed_journal/pkg/models/repository"
+	"github.com/v-venes/lol-feed-journal/pkg/models/repository"
 )
 
 type MatchChallenges struct {

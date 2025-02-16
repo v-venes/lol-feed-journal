@@ -10,10 +10,10 @@ import (
 	_ "github.com/lib/pq"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
-	imagegenerator "github.com/v-venes/feed_journal/internal/image_generator"
-	"github.com/v-venes/feed_journal/pkg/config"
-	"github.com/v-venes/feed_journal/pkg/repositories"
-	"github.com/v-venes/feed_journal/pkg/services"
+	imagegenerator "github.com/v-venes/lol-feed-journal/internal/image_generator"
+	"github.com/v-venes/lol-feed-journal/pkg/config"
+	"github.com/v-venes/lol-feed-journal/pkg/repositories"
+	"github.com/v-venes/lol-feed-journal/pkg/services"
 )
 
 func init() {

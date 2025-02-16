@@ -3,7 +3,7 @@ package feedjournal
 import (
 	"time"
 
-	"github.com/v-venes/feed_journal/pkg/models/repository"
+	"github.com/v-venes/lol-feed-journal/pkg/models/repository"
 )
 
 type Journal struct {

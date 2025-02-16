@@ -10,10 +10,10 @@ import (
 
 	"github.com/go-redis/redis/v8"
 	"github.com/golang/freetype/truetype"
-	feedjournal "github.com/v-venes/feed_journal/pkg/models/feed_journal"
-	redismodel "github.com/v-venes/feed_journal/pkg/models/redis"
-	"github.com/v-venes/feed_journal/pkg/repositories"
-	"github.com/v-venes/feed_journal/pkg/services"
+	feedjournal "github.com/v-venes/lol-feed-journal/pkg/models/feed_journal"
+	redismodel "github.com/v-venes/lol-feed-journal/pkg/models/redis"
+	"github.com/v-venes/lol-feed-journal/pkg/repositories"
+	"github.com/v-venes/lol-feed-journal/pkg/services"
 	"golang.org/x/image/font/gofont/goregular"
 
 	"github.com/minio/minio-go/v7"

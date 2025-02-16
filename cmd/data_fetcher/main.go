@@ -8,9 +8,9 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
-	datafetcher "github.com/v-venes/feed_journal/internal/data_fetcher"
-	"github.com/v-venes/feed_journal/pkg/config"
-	"github.com/v-venes/feed_journal/pkg/repositories"
+	datafetcher "github.com/v-venes/lol-feed-journal/internal/data_fetcher"
+	"github.com/v-venes/lol-feed-journal/pkg/config"
+	"github.com/v-venes/lol-feed-journal/pkg/repositories"
 )
 
 func init() {
