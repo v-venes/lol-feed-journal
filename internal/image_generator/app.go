@@ -29,6 +29,7 @@ type Application struct {
 	RedisClient      *redis.Client
 	RedisChannel     string
 	MinioClient      *minio.Client
+	MinioBucketName  string
 }
 
 type NewApplicationParams struct {
@@ -38,6 +39,7 @@ type NewApplicationParams struct {
 	RedisClient      *redis.Client
 	RedisChannel     string
 	MinioClient      *minio.Client
+	MinioBucketName  string
 }
 
 type TemplateDimensions struct {
@@ -65,6 +67,7 @@ func NewApplication(params NewApplicationParams) *Application {
 		RedisClient:      params.RedisClient,
 		RedisChannel:     params.RedisChannel,
 		MinioClient:      params.MinioClient,
+		MinioBucketName:  params.MinioBucketName,
 	}
 }
 
@@ -112,14 +115,27 @@ func (a *Application) startImageGeneration(matchDate time.Time) (string, error) 
 		return "", err
 	}
 
-	downloadPath := "/tmp/template.png"
-	err = a.MinioClient.FGetObject(context.Background(), "feedjournal", "template/feed_journal_template.png", downloadPath, minio.GetObjectOptions{})
+	templatePath, err := a.getTemplateImage()
+
 	if err != nil {
 		return "", err
 	}
 
-	// TODO: refatorar essa parte, fazendo tudo junto só pra testar
+	journalLocalPath, err := a.generateJournal(journalInfo, matchDate, templatePath)
+	if err != nil {
+		return "", err
+	}
 
+	journalBucketPath, err := a.saveJournalImage(journalLocalPath, matchDate)
+	if err != nil {
+		return "", err
+	}
+
+	return journalBucketPath, nil
+}
+
+func (a *Application) generateJournal(journalInfo *feedjournal.Journal, matchDate time.Time, templatePath string) (string, error) {
+	// TODO: refactor this
 	dimensions := TemplateDimensions{
 		ChampionImageYOffset:        162,
 		ChampionImageDistanceOffset: 53,
@@ -136,7 +152,7 @@ func (a *Application) startImageGeneration(matchDate time.Time) (string, error) 
 		PlayerRightInfoXOffset:   608.4,
 		PlayerInfoDistanceOffset: 51.7,
 	}
-	im1, err := gg.LoadPNG(downloadPath)
+	im1, err := gg.LoadPNG(templatePath)
 	if err != nil {
 		return "", err
 	}
@@ -163,16 +179,23 @@ func (a *Application) startImageGeneration(matchDate time.Time) (string, error) 
 		kdaText := fmt.Sprintf("%d/%d/%d", player.Kills, player.Deaths, player.Assists)
 		dc.DrawString(kdaText, dimensions.PlayerLeftInfoXOffset, dimensions.PlayerKDAYOffset+(dimensions.PlayerInfoDistanceOffset*float64(index)))
 
-		imagePath, err := a.LeagueService.DownloadChampionSquareImage(player.ChampionName)
+		champName := player.ChampionName
+
+		// DDragon doesn't recognize FiddleSticks.png
+		if champName == "FiddleSticks" {
+			champName = "Fiddlesticks"
+		}
+
+		imagePath, err := a.LeagueService.DownloadChampionSquareImage(champName)
 		if err != nil {
 			return "", err
 		}
 
-		img, err := gg.LoadPNG(*imagePath)
-		championImg := imaging.Resize(img, dimensions.ChampionImageSize, dimensions.ChampionImageSize, imaging.Lanczos)
+		img, err := gg.LoadPNG(imagePath)
 		if err != nil {
 			return "", err
 		}
+		championImg := imaging.Resize(img, dimensions.ChampionImageSize, dimensions.ChampionImageSize, imaging.Lanczos)
 
 		dc.DrawImage(championImg, dimensions.ChampionLeftImageX, dimensions.ChampionImageYOffset+(dimensions.ChampionImageDistanceOffset*index))
 	}
@@ -182,40 +205,62 @@ func (a *Application) startImageGeneration(matchDate time.Time) (string, error) 
 		kdaText := fmt.Sprintf("%d/%d/%d", player.Kills, player.Deaths, player.Assists)
 		dc.DrawString(kdaText, float64(dimensions.PlayerRightInfoXOffset), dimensions.PlayerKDAYOffset+(dimensions.PlayerInfoDistanceOffset*float64(index)))
 
-		imagePath, err := a.LeagueService.DownloadChampionSquareImage(player.ChampionName)
+		champName := player.ChampionName
+
+		if champName == "FiddleSticks" {
+			champName = "Fiddlesticks"
+		}
+
+		imagePath, err := a.LeagueService.DownloadChampionSquareImage(champName)
 		if err != nil {
 			return "", err
 		}
 
-		img, err := gg.LoadPNG(*imagePath)
-		championImg := imaging.Resize(img, dimensions.ChampionImageSize, dimensions.ChampionImageSize, imaging.Lanczos)
+		img, err := gg.LoadPNG(imagePath)
 		if err != nil {
 			return "", err
 		}
+		championImg := imaging.Resize(img, dimensions.ChampionImageSize, dimensions.ChampionImageSize, imaging.Lanczos)
 
 		dc.DrawImage(championImg, dimensions.ChampionRightImageX, dimensions.ChampionImageYOffset+(dimensions.ChampionImageDistanceOffset*index))
 	}
 
-	dc.SavePNG("./out.png")
+	journalPath := "/tmp/journal.png"
+	dc.SavePNG(journalPath)
+	return journalPath, nil
+}
 
-	file, err := os.Open("./out.png")
+func (a *Application) saveJournalImage(journalPath string, matchDate time.Time) (string, error) {
+	journalImg, err := os.Open(journalPath)
 	if err != nil {
 		return "", err
 	}
-	defer file.Close()
+	defer journalImg.Close()
 
-	fileInfo, err := file.Stat()
+	fileInfo, err := journalImg.Stat()
 	if err != nil {
 		return "", err
 	}
 
-	fileName := fmt.Sprintf("journals/journal-%s.png", matchDate.Format("2006-01-02"))
-	_, err = a.MinioClient.PutObject(context.Background(), "feedjournal", fileName, file, fileInfo.Size(), minio.PutObjectOptions{})
+	newJournalPath := fmt.Sprintf("journals/journal-%s.png", matchDate.Format("2006-01-02"))
+	_, err = a.MinioClient.PutObject(context.Background(), a.MinioBucketName, newJournalPath, journalImg, fileInfo.Size(), minio.PutObjectOptions{})
 	if err != nil {
 		return "", err
 	}
 
-	return fileName, nil
+	return newJournalPath, nil
+}
+
+func (a *Application) getTemplateImage() (string, error) {
+	downloadPath := "/tmp/template.png"
+
+	err := a.MinioClient.FGetObject(context.Background(), a.MinioBucketName, "template/feed_journal_template.png", downloadPath, minio.GetObjectOptions{})
+
+	if err != nil {
+		return "", err
+	}
+
+	return downloadPath, nil
 }
 
 func (a *Application) getJournalInfo(matchDate time.Time) (*feedjournal.Journal, error) {

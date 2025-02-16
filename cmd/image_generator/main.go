@@ -53,8 +53,9 @@ func main() {
 	}
 
 	leagueService := services.NewLeagueService(services.NewLeagueServiceParams{
-		Key:      env.RiotKey,
-		BasePath: env.RiotBasePath,
+		Key:        env.RiotKey,
+		BasePath:   env.RiotBasePath,
+		DDBasePath: env.RiotDDBasePath,
 	})
 
 	playerRepository := repositories.NewPlayerRepository(db)
@@ -67,6 +68,7 @@ func main() {
 		RedisClient:      rdb,
 		RedisChannel:     env.RedisChannel,
 		MinioClient:      minioClient,
+		MinioBucketName:  env.MinioBucket,
 	})
 
 	app.Run()

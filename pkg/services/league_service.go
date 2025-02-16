@@ -11,14 +11,16 @@ import (
 )
 
 type LeagueService struct {
-	key      string
-	basePath string
-	client   *http.Client
+	key        string
+	basePath   string
+	ddBasePath string
+	client     *http.Client
 }
 
 type NewLeagueServiceParams struct {
-	Key      string
-	BasePath string
+	Key        string
+	BasePath   string
+	DDBasePath string
 }
 
 type GetAccountIDParams struct {
@@ -34,9 +36,10 @@ type GetMatchesIDsParams struct {
 
 func NewLeagueService(params NewLeagueServiceParams) *LeagueService {
 	return &LeagueService{
-		key:      params.Key,
-		basePath: params.BasePath,
-		client:   &http.Client{},
+		key:        params.Key,
+		basePath:   params.BasePath,
+		ddBasePath: params.DDBasePath,
+		client:     &http.Client{},
 	}
 }
 
@@ -124,20 +127,19 @@ func (l *LeagueService) GetMatchDetails(matchId string) (*leaguemodel.Match, err
 	return matchDetails, nil
 }
 
-func (l *LeagueService) DownloadChampionSquareImage(championName string) (*string, error) {
-	// TODO: Refatorar essa parte
-	path := fmt.Sprintf("https://ddragon.leagueoflegends.com/cdn/15.2.1/img/champion/%s.png", championName)
+func (l *LeagueService) DownloadChampionSquareImage(championName string) (string, error) {
+	path := fmt.Sprintf("%s/img/champion/%s.png", l.ddBasePath, championName)
 
 	req, err := http.NewRequest("GET", path, nil)
 
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	resp, err := l.client.Do(req)
 
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	defer resp.Body.Close()
@@ -146,14 +148,14 @@ func (l *LeagueService) DownloadChampionSquareImage(championName string) (*strin
 
 	file, err := os.Create(filePath)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 	defer file.Close()
 
 	_, err = io.Copy(file, resp.Body)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return &filePath, nil
+	return filePath, nil
 }

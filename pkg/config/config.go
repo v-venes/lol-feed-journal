@@ -8,6 +8,7 @@ import (
 
 type Config struct {
 	RiotBasePath     string `env:"RIOT_API_BASE_PATH"`
+	RiotDDBasePath   string `env:"RIOT_DD_BASE_PATH"`
 	RiotKey          string `env:"RIOT_API_KEY"`
 	PostgresUser     string `env:"POSTGRES_USER"`
 	PostgresPassword string `env:"POSTGRES_PASSWORD"`
@@ -18,6 +19,7 @@ type Config struct {
 	MinioHost        string `env:"MINIO_HOST"`
 	MinioKey         string `env:"MINIO_KEY"`
 	MinioSecret      string `env:"MINIO_SECRET"`
+	MinioBucket      string `env:"MINIO_BUCKET"`
 	DiscordAppID     string `env:"DISCORD_APP_ID"`
 	DiscordAppSecret string `env:"DISCORD_APP_KEY"`
 	DiscordChannelID string `env:"DISCORD_CHANNEL_ID"`

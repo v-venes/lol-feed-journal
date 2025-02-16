@@ -13,19 +13,21 @@ import (
 )
 
 type Application struct {
-	RedisClient    *redis.Client
-	RedisChannel   string
-	DiscordSession *discordgo.Session
-	DiscordChannel string
-	MinioClient    *minio.Client
+	RedisClient     *redis.Client
+	RedisChannel    string
+	DiscordSession  *discordgo.Session
+	DiscordChannel  string
+	MinioClient     *minio.Client
+	MinioBucketName string
 }
 
 type NewApplicationParams struct {
-	RedisChannel   string
-	DiscordChannel string
-	RedisClient    *redis.Client
-	DiscordSession *discordgo.Session
-	MinioClient    *minio.Client
+	RedisChannel    string
+	DiscordChannel  string
+	RedisClient     *redis.Client
+	DiscordSession  *discordgo.Session
+	MinioClient     *minio.Client
+	MinioBucketName string
 }
 
 func NewApplication(params NewApplicationParams) *Application {
@@ -70,7 +72,7 @@ func (a *Application) Run() {
 func (a *Application) getJournalAndSend(journalPath string) error {
 	downloadPath := "/tmp/journal.png"
 
-	err := a.MinioClient.FGetObject(context.Background(), "feedjournal", journalPath, downloadPath, minio.GetObjectOptions{})
+	err := a.MinioClient.FGetObject(context.Background(), a.MinioBucketName, journalPath, downloadPath, minio.GetObjectOptions{})
 	if err != nil {
 		return err
 	}
@@ -82,7 +84,7 @@ func (a *Application) getJournalAndSend(journalPath string) error {
 	defer file.Close()
 
 	_, err = a.DiscordSession.ChannelMessageSendComplex(a.DiscordChannel, &discordgo.MessageSend{
-		Content: "@everyone Maiores porcões de hoje.",
+		Content: "@everyone Jornal do Feed do dia anterior",
 		Files: []*discordgo.File{
 			{
 				Name:   downloadPath,

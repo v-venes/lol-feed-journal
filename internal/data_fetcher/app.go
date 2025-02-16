@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"log"
+	"slices"
 	"sync"
 	"time"
 
@@ -24,6 +25,7 @@ type Application struct {
 
 type NewApplicationParams struct {
 	RiotBasePath     string
+	RiotDDBasePath   string
 	RiotApiKey       string
 	RedisChannel     string
 	PlayerRepository *repositories.PlayerRepository
@@ -33,8 +35,9 @@ type NewApplicationParams struct {
 
 func NewApplication(params NewApplicationParams) *Application {
 	leagueService := services.NewLeagueService(services.NewLeagueServiceParams{
-		Key:      params.RiotApiKey,
-		BasePath: params.RiotBasePath,
+		Key:        params.RiotApiKey,
+		BasePath:   params.RiotBasePath,
+		DDBasePath: params.RiotDDBasePath,
 	})
 
 	return &Application{
@@ -51,8 +54,8 @@ func (a *Application) Run() {
 	fetchDate := time.Now().In(brLoc)
 	// fetchStartDate := time.Date(fetchDate.Year(), fetchDate.Month(), fetchDate.Day(), 0, 0, 0, 0, fetchDate.Location())
 	// fetchEndDate := time.Date(fetchDate.Year(), fetchDate.Month(), fetchDate.Day(), 23, 59, 59, 0, fetchDate.Location())
-	fetchStartDate := time.Date(2025, 02, 04, 0, 0, 0, 0, fetchDate.Location())
-	fetchEndDate := time.Date(2025, 02, 04, 23, 59, 59, 0, fetchDate.Location())
+	fetchStartDate := time.Date(2025, 02, 15, 0, 0, 0, 0, fetchDate.Location())
+	fetchEndDate := time.Date(2025, 02, 15, 23, 59, 59, 0, fetchDate.Location())
 
 	players, err := a.PlayerRepository.GetAll()
 
@@ -68,7 +71,6 @@ func (a *Application) Run() {
 func (a *Application) startFetchData(players []repository.Player, fetchStartDate time.Time, fetchEndDate time.Time) {
 
 	for _, player := range players {
-
 		log.Printf("Fetching match data for %s\n", player.Username)
 
 		matchesIds, err := a.LeagueService.GetMatchesIDs(
@@ -95,19 +97,22 @@ func (a *Application) startFetchData(players []repository.Player, fetchStartDate
 
 		log.Printf("Fetch completed for %s\n", player.Username)
 
-		time.Sleep(30 * time.Second)
+		if len(matchesIds) > 0 {
+			time.Sleep(30 * time.Second)
+		}
 	}
 
 }
 
 func (a *Application) processMatch(matchID string, fetchDate time.Time) error {
 	matchDetails, err := a.LeagueService.GetMatchDetails(matchID)
+	gameModesToIgnore := []string{"URF", "SWIFTPLAY"}
 
 	if err != nil {
 		return err
 	}
 
-	if matchDetails.Info.GameMode == "URF" || matchDetails.Info.GameMode == "SWIFTPLAY" {
+	if slices.Contains(gameModesToIgnore, matchDetails.Info.GameMode) {
 		return nil
 	}
 

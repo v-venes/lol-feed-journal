@@ -47,6 +47,7 @@ func main() {
 	app := datafetcher.NewApplication(datafetcher.NewApplicationParams{
 		RiotBasePath:     env.RiotBasePath,
 		RiotApiKey:       env.RiotKey,
+		RiotDDBasePath:   env.RiotDDBasePath,
 		PlayerRepository: playerRepository,
 		MatchRepository:  matchRepository,
 		RedisClient:      rdb,

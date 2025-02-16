@@ -46,11 +46,12 @@ func main() {
 	defer dg.Close()
 
 	app := discordbot.NewApplication(discordbot.NewApplicationParams{
-		RedisClient:    rdb,
-		RedisChannel:   "send_to_discord",
-		DiscordSession: dg,
-		DiscordChannel: env.DiscordChannelID,
-		MinioClient:    minioClient,
+		RedisClient:     rdb,
+		RedisChannel:    "send_to_discord",
+		DiscordSession:  dg,
+		DiscordChannel:  env.DiscordChannelID,
+		MinioClient:     minioClient,
+		MinioBucketName: env.MinioBucket,
 	})
 
 	app.Run()

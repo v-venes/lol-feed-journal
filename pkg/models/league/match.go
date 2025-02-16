@@ -62,16 +62,14 @@ func (m *Match) ToRepositoryMatch(matchDate time.Time) []repository.Match {
 			continue
 		}
 
-		// killsWeight := 1.0
-		// assistsWeight := 0.5
-		assistsWeight := 0.16
-
 		kills := float64(participant.Kills)
 		assists := float64(participant.Assists)
 		deaths := float64(participant.Deaths)
 
-		// kda := (((1 + kills) * killsWeight) + (assists * assistsWeight)) / math.Pow((deaths+1), 3)
-		kda := (1 + (kills+(assists*assistsWeight))/deaths)
+		kda := kills + (deaths * -2) + (assists * 0.5)
+		if participant.Role == "SUPPORT" && participant.TeamPosition == "UTILITY" {
+			kda = (kills * 0.75) + (deaths * -2) + (assists * 0.75)
+		}
 
 		matchs = append(matchs, repository.Match{
 			Id:                 m.Metadata.MatchID,
