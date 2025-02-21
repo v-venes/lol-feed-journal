@@ -96,17 +96,20 @@ func (a *Application) startFetchData(players []repository.Player, fetchStartDate
 		log.Printf("Fetch completed for %s\n", player.Username)
 
 		if len(matchesIds) > 0 {
-			time.Sleep(30 * time.Second)
+			time.Sleep(40 * time.Second)
+		} else {
+			time.Sleep(20 * time.Second)
 		}
 	}
 
 }
 
 func (a *Application) processMatch(matchID string, fetchDate time.Time) error {
-	matchDetails, err := a.LeagueService.GetMatchDetails(matchID)
 	gameModesToIgnore := []string{"URF", "SWIFTPLAY"}
+	matchDetails, err := a.LeagueService.GetMatchDetails(matchID)
 
 	if err != nil {
+		log.Printf("error getting match")
 		return err
 	}
 
@@ -123,6 +126,7 @@ func (a *Application) processMatch(matchID string, fetchDate time.Time) error {
 	err = a.MatchRepository.SaveMatchs(matchsByPlayers)
 
 	if err != nil {
+		log.Printf("error saving match")
 		return err
 	}
 

@@ -1,5 +1,41 @@
 services:
 
+  # data_fecher:
+  #   image: lol-feed-journal/data_fetcher:latest
+  #   build:
+  #     context: ../
+  #     dockerfile: build/package/data_fetcher/Dockerfile
+  #   depends_on:
+  #     - postgres
+  #     - minio
+  #     - redis
+  #   env_file:
+  #     - ../.env
+
+  # disc_bot:
+  #   image: lol-feed-journal/disc_bot:latest
+  #   build:
+  #     context: ../
+  #     dockerfile: build/package/disc_bot/Dockerfile
+  #   depends_on:
+  #     - postgres
+  #     - minio
+  #     - redis
+  #   env_file:
+  #     - ../.env
+
+  # image_generator:
+  #   image: lol-feed-journal/image_generator:latest
+  #   build:
+  #     context: ../
+  #     dockerfile: build/package/image_generator/Dockerfile
+  #   depends_on:
+  #     - postgres
+  #     - minio
+  #     - redis
+  #   env_file:
+  #     - ../.env
+
   postgres:
     image: postgres:13
     environment:

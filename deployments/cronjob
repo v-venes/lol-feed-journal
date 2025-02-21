@@ -1,0 +1,1 @@
+59 23 * * * root /app/data_fetcher >> /var/log/data_fetcher.log 2>&1

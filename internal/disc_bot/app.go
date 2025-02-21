@@ -33,11 +33,12 @@ type NewApplicationParams struct {
 func NewApplication(params NewApplicationParams) *Application {
 
 	return &Application{
-		RedisClient:    params.RedisClient,
-		RedisChannel:   params.RedisChannel,
-		DiscordSession: params.DiscordSession,
-		DiscordChannel: params.DiscordChannel,
-		MinioClient:    params.MinioClient,
+		RedisClient:     params.RedisClient,
+		RedisChannel:    params.RedisChannel,
+		DiscordSession:  params.DiscordSession,
+		DiscordChannel:  params.DiscordChannel,
+		MinioClient:     params.MinioClient,
+		MinioBucketName: params.MinioBucketName,
 	}
 }
 
