@@ -3,7 +3,7 @@ package league
 import (
 	"time"
 
-	"github.com/v-venes/lol-feed-journal/pkg/models/repository"
+	domain "github.com/v-venes/lol-feed-journal/internal/domain/repository"
 )
 
 type MatchChallenges struct {
@@ -49,12 +49,12 @@ type Match struct {
 	Info     MatchInfo     `json:"info"`
 }
 
-func (m *Match) ToRepositoryMatch(matchDate time.Time) []repository.Match {
+func (m *Match) ToRepositoryMatch(matchDate time.Time) []domain.Match {
 	if m == nil {
 		return nil
 	}
 
-	var matchs []repository.Match
+	var matchs []domain.Match
 
 	for _, participant := range m.Info.Participants {
 
@@ -71,7 +71,7 @@ func (m *Match) ToRepositoryMatch(matchDate time.Time) []repository.Match {
 			kda = (kills * 0.75) + (deaths * -2) + (assists * 0.75)
 		}
 
-		matchs = append(matchs, repository.Match{
+		matchs = append(matchs, domain.Match{
 			Id:                 m.Metadata.MatchID,
 			Puuid:              participant.Puuid,
 			ProfileIcon:        participant.ProfileIcon,

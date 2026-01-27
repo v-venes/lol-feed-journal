@@ -1,11 +1,7 @@
-package redis
+package imagegenerator
 
 import "time"
 
 type GenerateImagePayload struct {
 	MatchDate time.Time `json:"matchDate"`
-}
-
-type SendToDiscordPayload struct {
-	JournalPath string `json:"journalPath"`
 }

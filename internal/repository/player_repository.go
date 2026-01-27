@@ -1,8 +1,8 @@
-package repositories
+package repository
 
 import (
 	"github.com/jmoiron/sqlx"
-	repositorymodel "github.com/v-venes/lol-feed-journal/pkg/models/repository"
+	repositorymodel "github.com/v-venes/lol-feed-journal/internal/domain/repository"
 )
 
 type PlayerRepository struct {
@@ -17,7 +17,6 @@ func NewPlayerRepository(db *sqlx.DB) *PlayerRepository {
 
 func (p *PlayerRepository) GetAll() ([]repositorymodel.Player, error) {
 	players, err := p.Repository.GetAll("SELECT * FROM players")
-
 	if err != nil {
 		return nil, err
 	}

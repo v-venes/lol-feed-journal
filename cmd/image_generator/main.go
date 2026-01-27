@@ -10,10 +10,10 @@ import (
 	_ "github.com/lib/pq"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
+	"github.com/v-venes/lol-feed-journal/internal/config"
 	imagegenerator "github.com/v-venes/lol-feed-journal/internal/image_generator"
-	"github.com/v-venes/lol-feed-journal/pkg/config"
-	"github.com/v-venes/lol-feed-journal/pkg/repositories"
-	"github.com/v-venes/lol-feed-journal/pkg/services"
+	"github.com/v-venes/lol-feed-journal/internal/repository"
+	"github.com/v-venes/lol-feed-journal/internal/service"
 )
 
 func init() {
@@ -31,7 +31,6 @@ func main() {
 	)
 
 	db, err := sqlx.Connect("postgres", connStr)
-
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -52,14 +51,14 @@ func main() {
 		log.Fatal(err)
 	}
 
-	leagueService := services.NewLeagueService(services.NewLeagueServiceParams{
+	leagueService := service.NewLeagueService(service.NewLeagueServiceParams{
 		Key:        env.RiotKey,
 		BasePath:   env.RiotBasePath,
 		DDBasePath: env.RiotDDBasePath,
 	})
 
-	playerRepository := repositories.NewPlayerRepository(db)
-	matchRepository := repositories.NewMatchRepository(db)
+	playerRepository := repository.NewPlayerRepository(db)
+	matchRepository := repository.NewMatchRepository(db)
 
 	app := imagegenerator.NewApplication(imagegenerator.NewApplicationParams{
 		PlayerRepository: playerRepository,
