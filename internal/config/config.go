@@ -14,6 +14,7 @@ type Config struct {
 	PostgresPassword string `env:"POSTGRES_PASSWORD"`
 	PostgresHost     string `env:"POSTGRES_HOST"`
 	PostgresDB       string `env:"POSTGRES_DB"`
+	PostgresPort     string `env:"POSTGRES_PORT"`
 	RedisHost        string `env:"REDIS_HOST"`
 	RedisChannel     string `env:"REDIS_CHANNEL"`
 	MinioHost        string `env:"MINIO_HOST"`
@@ -28,7 +29,6 @@ type Config struct {
 func GetConfigVars() *Config {
 	var config Config
 	_, err := env.UnmarshalFromEnviron(&config)
-
 	if err != nil {
 		log.Fatal(err)
 	}
