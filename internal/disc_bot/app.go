@@ -9,7 +9,6 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/go-redis/redis/v8"
 	"github.com/minio/minio-go/v7"
-	redismodel "github.com/v-venes/lol-feed-journal/pkg/models/redis"
 )
 
 type Application struct {
@@ -31,7 +30,6 @@ type NewApplicationParams struct {
 }
 
 func NewApplication(params NewApplicationParams) *Application {
-
 	return &Application{
 		RedisClient:     params.RedisClient,
 		RedisChannel:    params.RedisChannel,
@@ -54,16 +52,14 @@ func (a *Application) Run() {
 			log.Fatal(err)
 		}
 
-		var message redismodel.SendToDiscordPayload
+		var message SendToDiscordPayload
 
 		err = json.Unmarshal([]byte(msg.Payload), &message)
-
 		if err != nil {
 			log.Fatal(err)
 		}
 
 		err = a.getJournalAndSend(message.JournalPath)
-
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -93,7 +89,6 @@ func (a *Application) getJournalAndSend(journalPath string) error {
 			},
 		},
 	})
-
 	if err != nil {
 		return err
 	}

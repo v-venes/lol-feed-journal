@@ -1,4 +1,4 @@
-package services
+package service
 
 import (
 	"encoding/json"
@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"os"
 
-	leaguemodel "github.com/v-venes/lol-feed-journal/pkg/models/league"
+	leaguemodel "github.com/v-venes/lol-feed-journal/internal/domain/league"
 )
 
 type LeagueService struct {
@@ -47,13 +47,11 @@ func (l *LeagueService) GetAccountID(params GetAccountIDParams) (*leaguemodel.Ac
 	path := fmt.Sprintf("%s/riot/account/v1/accounts/by-riot-id/%s/%s?api_key=%s", l.basePath, params.Name, params.Tag, l.key)
 
 	req, err := http.NewRequest("GET", path, nil)
-
 	if err != nil {
 		return nil, err
 	}
 
 	resp, err := l.client.Do(req)
-
 	if err != nil {
 		return nil, err
 	}
@@ -63,7 +61,6 @@ func (l *LeagueService) GetAccountID(params GetAccountIDParams) (*leaguemodel.Ac
 	accountInfo := &leaguemodel.Account{}
 
 	err = json.NewDecoder(resp.Body).Decode(accountInfo)
-
 	if err != nil {
 		return nil, err
 	}
@@ -75,13 +72,11 @@ func (l *LeagueService) GetMatchesIDs(params GetMatchesIDsParams) ([]string, err
 	path := fmt.Sprintf("%s/lol/match/v5/matches/by-puuid/%s/ids?startTime=%d&endTime=%d&api_key=%s", l.basePath, params.AccountID, params.From, params.To, l.key)
 
 	req, err := http.NewRequest("GET", path, nil)
-
 	if err != nil {
 		return nil, err
 	}
 
 	resp, err := l.client.Do(req)
-
 	if err != nil {
 		return nil, err
 	}
@@ -91,7 +86,6 @@ func (l *LeagueService) GetMatchesIDs(params GetMatchesIDsParams) ([]string, err
 	var matchesIDs []string
 
 	err = json.NewDecoder(resp.Body).Decode(&matchesIDs)
-
 	if err != nil {
 		return nil, err
 	}
@@ -103,13 +97,11 @@ func (l *LeagueService) GetMatchDetails(matchId string) (*leaguemodel.Match, err
 	path := fmt.Sprintf("%s/lol/match/v5/matches/%s?api_key=%s", l.basePath, matchId, l.key)
 
 	req, err := http.NewRequest("GET", path, nil)
-
 	if err != nil {
 		return nil, err
 	}
 
 	resp, err := l.client.Do(req)
-
 	if err != nil {
 		return nil, err
 	}
@@ -119,7 +111,6 @@ func (l *LeagueService) GetMatchDetails(matchId string) (*leaguemodel.Match, err
 	matchDetails := &leaguemodel.Match{}
 
 	err = json.NewDecoder(resp.Body).Decode(matchDetails)
-
 	if err != nil {
 		return nil, err
 	}
@@ -131,13 +122,11 @@ func (l *LeagueService) DownloadChampionSquareImage(championName string) (string
 	path := fmt.Sprintf("%s/img/champion/%s.png", l.ddBasePath, championName)
 
 	req, err := http.NewRequest("GET", path, nil)
-
 	if err != nil {
 		return "", err
 	}
 
 	resp, err := l.client.Do(req)
-
 	if err != nil {
 		return "", err
 	}

@@ -1,10 +1,10 @@
-package repositories
+package repository
 
 import (
 	"time"
 
 	"github.com/jmoiron/sqlx"
-	repositorymodel "github.com/v-venes/lol-feed-journal/pkg/models/repository"
+	repositorymodel "github.com/v-venes/lol-feed-journal/internal/domain/repository"
 )
 
 type MatchRepository struct {
@@ -34,7 +34,6 @@ func (p *MatchRepository) SaveMatchs(matchs []repositorymodel.Match) error {
         ON CONFLICT (id, puuid) DO NOTHING
     `
 	err := p.Repository.SaveMany(query, matchs)
-
 	if err != nil {
 		return err
 	}
@@ -51,7 +50,6 @@ func (p *MatchRepository) GetTop10StoredPlayersMatches(matchDate time.Time) ([]r
         LIMIT 10
     `
 	matches, err := p.Repository.GetAll(query, matchDate)
-
 	if err != nil {
 		return nil, err
 	}
@@ -68,7 +66,6 @@ func (p *MatchRepository) GetTop10RandomPlayersMatches(matchDate time.Time) ([]r
         LIMIT 10
     `
 	matches, err := p.Repository.GetAll(query, matchDate)
-
 	if err != nil {
 		return nil, err
 	}

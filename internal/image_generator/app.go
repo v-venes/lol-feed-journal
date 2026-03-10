@@ -10,10 +10,10 @@ import (
 
 	"github.com/go-redis/redis/v8"
 	"github.com/golang/freetype/truetype"
-	feedjournal "github.com/v-venes/lol-feed-journal/pkg/models/feed_journal"
-	redismodel "github.com/v-venes/lol-feed-journal/pkg/models/redis"
-	"github.com/v-venes/lol-feed-journal/pkg/repositories"
-	"github.com/v-venes/lol-feed-journal/pkg/services"
+	discbot "github.com/v-venes/lol-feed-journal/internal/disc_bot"
+	feedjournal "github.com/v-venes/lol-feed-journal/internal/domain/feed_journal"
+	"github.com/v-venes/lol-feed-journal/internal/repository"
+	"github.com/v-venes/lol-feed-journal/internal/service"
 	"golang.org/x/image/font/gofont/goregular"
 
 	"github.com/minio/minio-go/v7"
@@ -23,9 +23,9 @@ import (
 )
 
 type Application struct {
-	PlayerRepository *repositories.PlayerRepository
-	MatchRepository  *repositories.MatchRepository
-	LeagueService    *services.LeagueService
+	PlayerRepository *repository.PlayerRepository
+	MatchRepository  *repository.MatchRepository
+	LeagueService    *service.LeagueService
 	RedisClient      *redis.Client
 	RedisChannel     string
 	MinioClient      *minio.Client
@@ -33,9 +33,9 @@ type Application struct {
 }
 
 type NewApplicationParams struct {
-	PlayerRepository *repositories.PlayerRepository
-	MatchRepository  *repositories.MatchRepository
-	LeagueService    *services.LeagueService
+	PlayerRepository *repository.PlayerRepository
+	MatchRepository  *repository.MatchRepository
+	LeagueService    *service.LeagueService
 	RedisClient      *redis.Client
 	RedisChannel     string
 	MinioClient      *minio.Client
@@ -83,24 +83,21 @@ func (a *Application) Run() {
 			log.Fatal(err)
 		}
 
-		var message redismodel.GenerateImagePayload
+		var message GenerateImagePayload
 
 		err = json.Unmarshal([]byte(msg.Payload), &message)
-
 		if err != nil {
 			log.Fatal(err)
 		}
 
 		journalPath, err := a.startImageGeneration(message.MatchDate)
-
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		discordMessage := redismodel.SendToDiscordPayload{JournalPath: journalPath}
+		discordMessage := discbot.SendToDiscordPayload{JournalPath: journalPath}
 		jsonMsg, _ := json.Marshal(discordMessage)
 		err = a.RedisClient.Publish(ctx, "send_to_discord", jsonMsg).Err()
-
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -108,15 +105,12 @@ func (a *Application) Run() {
 }
 
 func (a *Application) startImageGeneration(matchDate time.Time) (string, error) {
-
 	journalInfo, err := a.getJournalInfo(matchDate)
-
 	if err != nil {
 		return "", err
 	}
 
 	templatePath, err := a.getTemplateImage()
-
 	if err != nil {
 		return "", err
 	}
@@ -255,7 +249,6 @@ func (a *Application) getTemplateImage() (string, error) {
 	downloadPath := "/tmp/template.png"
 
 	err := a.MinioClient.FGetObject(context.Background(), a.MinioBucketName, "template/feed_journal_template.png", downloadPath, minio.GetObjectOptions{})
-
 	if err != nil {
 		return "", err
 	}
@@ -265,13 +258,11 @@ func (a *Application) getTemplateImage() (string, error) {
 
 func (a *Application) getJournalInfo(matchDate time.Time) (*feedjournal.Journal, error) {
 	storedPlayers, err := a.MatchRepository.GetTop10StoredPlayersMatches(matchDate)
-
 	if err != nil {
 		return nil, err
 	}
 
 	randomPlayers, err := a.MatchRepository.GetTop10RandomPlayersMatches(matchDate)
-
 	if err != nil {
 		return nil, err
 	}

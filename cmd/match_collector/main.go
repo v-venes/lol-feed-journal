@@ -8,9 +8,9 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
-	datafetcher "github.com/v-venes/lol-feed-journal/internal/data_fetcher"
-	"github.com/v-venes/lol-feed-journal/pkg/config"
-	"github.com/v-venes/lol-feed-journal/pkg/repositories"
+	"github.com/v-venes/lol-feed-journal/internal/config"
+	matchcollector "github.com/v-venes/lol-feed-journal/internal/match_collector"
+	"github.com/v-venes/lol-feed-journal/internal/repository"
 )
 
 func init() {
@@ -28,7 +28,6 @@ func main() {
 	)
 
 	db, err := sqlx.Connect("postgres", connStr)
-
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -41,10 +40,10 @@ func main() {
 	})
 	defer rdb.Close()
 
-	playerRepository := repositories.NewPlayerRepository(db)
-	matchRepository := repositories.NewMatchRepository(db)
+	playerRepository := repository.NewPlayerRepository(db)
+	matchRepository := repository.NewMatchRepository(db)
 
-	app := datafetcher.NewApplication(datafetcher.NewApplicationParams{
+	app := matchcollector.NewApplication(matchcollector.NewApplicationParams{
 		RiotBasePath:     env.RiotBasePath,
 		RiotApiKey:       env.RiotKey,
 		RiotDDBasePath:   env.RiotDDBasePath,

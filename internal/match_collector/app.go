@@ -1,4 +1,4 @@
-package datafetcher
+package matchcollector
 
 import (
 	"context"
@@ -9,16 +9,16 @@ import (
 	"time"
 
 	"github.com/go-redis/redis/v8"
-	redismodel "github.com/v-venes/lol-feed-journal/pkg/models/redis"
-	"github.com/v-venes/lol-feed-journal/pkg/models/repository"
-	"github.com/v-venes/lol-feed-journal/pkg/repositories"
-	"github.com/v-venes/lol-feed-journal/pkg/services"
+	domain "github.com/v-venes/lol-feed-journal/internal/domain/repository"
+	imagegenerator "github.com/v-venes/lol-feed-journal/internal/image_generator"
+	"github.com/v-venes/lol-feed-journal/internal/repository"
+	services "github.com/v-venes/lol-feed-journal/internal/service"
 )
 
 type Application struct {
 	LeagueService    *services.LeagueService
-	PlayerRepository *repositories.PlayerRepository
-	MatchRepository  *repositories.MatchRepository
+	PlayerRepository *repository.PlayerRepository
+	MatchRepository  *repository.MatchRepository
 	RedisClient      *redis.Client
 	RedisChannel     string
 }
@@ -28,8 +28,8 @@ type NewApplicationParams struct {
 	RiotDDBasePath   string
 	RiotApiKey       string
 	RedisChannel     string
-	PlayerRepository *repositories.PlayerRepository
-	MatchRepository  *repositories.MatchRepository
+	PlayerRepository *repository.PlayerRepository
+	MatchRepository  *repository.MatchRepository
 	RedisClient      *redis.Client
 }
 
@@ -56,7 +56,6 @@ func (a *Application) Run() {
 	fetchEndDate := time.Date(fetchDate.Year(), fetchDate.Month(), fetchDate.Day(), 23, 59, 59, 0, fetchDate.Location())
 
 	players, err := a.PlayerRepository.GetAll()
-
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -66,15 +65,13 @@ func (a *Application) Run() {
 	a.sendToGenerateImageQueue(fetchStartDate)
 }
 
-func (a *Application) startFetchData(players []repository.Player, fetchStartDate time.Time, fetchEndDate time.Time) {
-
+func (a *Application) startFetchData(players []domain.Player, fetchStartDate time.Time, fetchEndDate time.Time) {
 	for _, player := range players {
 		log.Printf("Fetching match data for %s\n", player.Username)
 
 		matchesIds, err := a.LeagueService.GetMatchesIDs(
 			services.GetMatchesIDsParams{AccountID: player.Puuid, From: uint32(fetchStartDate.UnixMilli() / 1000), To: uint32(fetchEndDate.UnixMilli() / 1000)},
 		)
-
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -101,13 +98,11 @@ func (a *Application) startFetchData(players []repository.Player, fetchStartDate
 			time.Sleep(20 * time.Second)
 		}
 	}
-
 }
 
 func (a *Application) processMatch(matchID string, fetchDate time.Time) error {
 	gameModesToIgnore := []string{"URF", "SWIFTPLAY"}
 	matchDetails, err := a.LeagueService.GetMatchDetails(matchID)
-
 	if err != nil {
 		log.Printf("error getting match")
 		return err
@@ -124,7 +119,6 @@ func (a *Application) processMatch(matchID string, fetchDate time.Time) error {
 	}
 
 	err = a.MatchRepository.SaveMatchs(matchsByPlayers)
-
 	if err != nil {
 		log.Printf("error saving match")
 		return err
@@ -136,15 +130,13 @@ func (a *Application) processMatch(matchID string, fetchDate time.Time) error {
 func (a *Application) sendToGenerateImageQueue(matchDate time.Time) error {
 	ctx := context.Background()
 
-	message := redismodel.GenerateImagePayload{MatchDate: matchDate}
+	message := imagegenerator.GenerateImagePayload{MatchDate: matchDate}
 	jsonMsg, _ := json.Marshal(message)
 
 	err := a.RedisClient.Publish(ctx, a.RedisChannel, jsonMsg).Err()
-
 	if err != nil {
 		return err
 	}
 
 	return nil
-
 }
